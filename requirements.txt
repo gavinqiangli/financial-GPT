@@ -1,0 +1,8 @@
+streamlit
+openai
+requests
+python-dotenv
+pydantic==1.*
+pandas
+certifi
+langchain
