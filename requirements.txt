@@ -1,4 +1,6 @@
 streamlit
+streamlit-feedback
+trubrics
 openai
 requests
 python-dotenv
@@ -6,3 +8,6 @@ pydantic==1.*
 pandas
 certifi
 langchain
+langchain_openai
+bs4
+tiktoken

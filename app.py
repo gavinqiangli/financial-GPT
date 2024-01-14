@@ -5,6 +5,9 @@ from urllib.request import urlopen
 import certifi
 import json
 import pandas as pd
+from chatstock import chat_stock
+import yfinance as yf
+from researcher import generate_response
 
 import os
 from dotenv import load_dotenv
@@ -35,26 +38,58 @@ def get_financial_statements(ticker, limit, period, statement_type):
     
     data = get_jsonparsed_data(url)
     print(data)
-
     return data
 
 
-# Retrieving key financial metrics for given periods
+# Step 1: Retrieving key financial metrics for given periods
 def get_key_metrics(ticker, limit, period):
     url = f"https://financialmodelingprep.com/api/v3/key-metrics/{ticker}?period={period}&limit={limit}&apikey={FMP_API_KEY}"
     data = get_jsonparsed_data(url)
     print(data)
+    return data
 
+# Step 1: Retrieving esg info for a company
+# "Special Endpoint : This endpoint is not available under your current subscription 
+# please visit our subscription page to upgrade your plan at https://site.financialmodelingprep.com/developer/docs/pricing"
+def get_esg_info(ticker):
+    # url = f"https://financialmodelingprep.com/api/v4/esg-environmental-social-governance-data?symbol={ticker}&apikey={FMP_API_KEY}"
+    # data = get_jsonparsed_data(url)
+    # print(data)
+    # url = f"https://financialmodelingprep.com/api/v4/esg-environmental-social-governance-data-ratings?symbol={ticker}&apikey={FMP_API_KEY}"
+    # use researcher instead (a bit costly)
+    data = generate_response(f"provide ESG analysis for company with stock symbol {ticker}.")
+    return data
+
+# use yfinance instead
+def get_recommendation(ticker):
+    yf_ticker = yf.Ticker(ticker)
+    data = yf_ticker.recommendations.to_json()
+    print(data)
+    return data
+
+# Step 1: Retrieving financial news for a company
+# "Special Endpoint : This endpoint is not available under your current subscription 
+# please visit our subscription page to upgrade your plan at https://site.financialmodelingprep.com/developer/docs/pricing"
+def get_financial_news(ticker, limit, page):
+    url = f"https://financialmodelingprep.com/api/v3/stock_news?symbol={ticker}&limit={limit}&page={page}&apikey={FMP_API_KEY}"
+    data = get_jsonparsed_data(url)
+    print(data)
+    return data
+
+# use yfinance instead
+def get_financial_news(ticker):
+    yf_ticker = yf.Ticker(ticker)
+    data = yf_ticker.news
+    print(data)
     return data
 
 
-# Step 2 / Option 1: Generate Financial Statements Summary with GPT-4
+# Step 2: Generate Financial Statements Summary with GPT-4
 def generate_financial_statements_summary(financial_statements):
     """
     Generate a summary of financial statements for the statements using GPT-3.5 Turbo or GPT-4.
-    """
-    
-    # Option 1: Create a summary of key financial metrics for all four periods
+    """    
+    # Create a summary of key financial metrics for all four periods
     summaries = []
     if financial_statements:
         for i in range(len(financial_statements)):
@@ -69,11 +104,10 @@ def generate_financial_statements_summary(financial_statements):
 
     # Combine all summaries into a single string
     all_summaries = "\n\n".join(summaries)
-
     return all_summaries
 
    
-# Step 2 / Option 2: Get Key Metrics directly from FMP API
+# Step 2: Get Key Metrics directly from FMP API
 def generate_key_metrics_summary(key_metrics):
     """
     Get a summary of financial key metrics using FMP API.
@@ -83,7 +117,7 @@ def generate_key_metrics_summary(key_metrics):
     - Assess a company's financial performance and compare it to its competitors.
     """
 
-    # Option 2: Use FMP API to get key financial metrics for all four periods
+    # Use FMP API to get key financial metrics for all four periods
     summaries = []
     if key_metrics:
         for i in range(len(key_metrics)):
@@ -98,19 +132,18 @@ def generate_key_metrics_summary(key_metrics):
 
     # Combine all summaries into a single string
     all_summaries = "\n\n".join(summaries)
-
     return all_summaries
 
 
 # Step 3: Call GPT-4 for final analysis
-def final_analysis(all_summaries):
+def final_analysis(objective, all_summaries):
 
     response = client.chat.completions.create(
         model="gpt-4-1106-preview",
         messages=[
             {
                 "role": "system",
-                "content": "You are an AI trained to provide financial analysis based on financial statements.",
+                "content": f"You are an AI trained to provide financial analysis based on {objective}.",
             },
             {
                 "role": "user",
@@ -122,7 +155,6 @@ def final_analysis(all_summaries):
             }
         ]
     )
-
     return response.choices[0].message.content
 
 
@@ -162,7 +194,7 @@ def financial_statements():
 
                 statements_summary = generate_financial_statements_summary(financial_statements)
 
-                final_statements_summary = final_analysis(statements_summary)
+                final_statements_summary = final_analysis("Financial Statements", statements_summary)
 
                 st.write(f'Summary for {ticker} {statement_type}:\n\n {final_statements_summary}\n\n')
         st.success('Done!')
@@ -200,11 +232,75 @@ def financial_metrics():
 
                 key_metrics_summary = generate_key_metrics_summary(key_metrics)
 
-                final_key_metrics_summary = final_analysis(key_metrics_summary)
+                final_key_metrics_summary = final_analysis("Financial Metrics", key_metrics_summary)
 
                 st.write(f'Summary for {ticker} key metrics:\n\n {final_key_metrics_summary}\n\n')
         st.success('Done!')
 
+# Selecting financial assistant 3: esg_analysis
+def esg_analysis():
+    st.title('GPT 4 ESG Analysis')
+
+    ticker_input = st.text_input("Please enter the company ticker (such as MSFT):")
+    company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
+    if company_name:
+        ticker_gpt = get_ticker_by_gpt(company_name)
+        st.text(f"the company ticker for {company_name} is {ticker_gpt}")
+
+    if st.button('Run'):
+        with st.spinner("In progress..."):
+            if ticker_input: # always prioritize to use ticker_input
+                ticker = ticker_input
+            else:
+                ticker = ticker_gpt    
+            if ticker:
+                ticker = ticker.upper()
+                # esg_info = get_esg_info(ticker)
+                # final_esg_summary = final_analysis("ESG Analysis", esg_info)
+                final_esg_summary = get_esg_info(ticker)
+
+                st.write(f'Summary for {ticker} esg analysis:\n\n {final_esg_summary}\n\n')
+        st.success('Done!')
+
+
+# Selecting financial assistant 4: financial_news
+def financial_news():
+    st.title('GPT 4 Financial News')
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        page = st.number_input("Pages of past financial news to analyze:", min_value=0, max_value=4, value=0)
+
+    with col2:
+        limit = st.number_input("Number of past financial news to analyze:", min_value=1, max_value=50, value=4)
+    
+    ticker_input = st.text_input("Please enter the company ticker (such as MSFT):")
+    company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
+    if company_name:
+        ticker_gpt = get_ticker_by_gpt(company_name)
+        st.text(f"the company ticker for {company_name} is {ticker_gpt}")
+
+    if st.button('Run'):
+        with st.spinner("In progress..."):
+            if ticker_input: # always prioritize to use ticker_input
+                ticker = ticker_input
+            else:
+                ticker = ticker_gpt    
+            if ticker:
+                ticker = ticker.upper()
+                # financial_news = get_financial_news(ticker, limit, page)
+                financial_news = get_financial_news(ticker)
+                final_financial_news = final_analysis("Financial News", financial_news)
+
+                st.write(f'Summary for {ticker} financial news:\n\n {final_financial_news}\n\n')
+        st.success('Done!')
+
+# Selecting financial assistant 5: chat_with_stocks
+def chat_with_stocks():
+    st.title('GPT 4 Chat With Stocks')
+    st.subheader('Not Financial Advices')
+    chat_stock()
 
 # Panda frame the data
 def frame_data(data):
@@ -266,7 +362,7 @@ def get_ticker_by_gpt(company_name):
     return company_code
         
 
-# finally, to run our application
+# finally, to run main application
 def main():
     st.set_page_config(page_title="AI Financial Analyst", page_icon=":bird:")
 
@@ -288,11 +384,17 @@ def main():
 
     st.sidebar.header("Settings")
     app_mode = st.sidebar.selectbox("Choose your AI assistant:",
-        ["Financial Statements", "Financial Metrics"])
+        ["Financial Statements", "Financial Metrics", "ESG Analysis", "Financial News", "Chat With Stocks"])
     if app_mode == 'Financial Statements':
         financial_statements()
     if app_mode == 'Financial Metrics':
         financial_metrics()    
+    if app_mode == 'ESG Analysis':
+        esg_analysis()   
+    if app_mode == 'Financial News':
+        financial_news()   
+    if app_mode == 'Chat With Stocks':
+        chat_with_stocks()   
 
 
 if __name__ == '__main__':

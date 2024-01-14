@@ -4,7 +4,7 @@ load_dotenv()
 
 from langchain.agents import AgentType, initialize_agent
 from langchain_community.tools.yahoo_finance_news import YahooFinanceNewsTool
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 
 llm = ChatOpenAI(temperature=0.0)
 tools = [YahooFinanceNewsTool()]
