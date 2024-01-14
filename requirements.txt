@@ -11,3 +11,4 @@ langchain
 langchain_openai
 bs4
 tiktoken
+yfinance
