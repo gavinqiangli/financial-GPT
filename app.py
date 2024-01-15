@@ -52,20 +52,26 @@ def get_key_metrics(ticker, limit, period):
 # "Special Endpoint : This endpoint is not available under your current subscription 
 # please visit our subscription page to upgrade your plan at https://site.financialmodelingprep.com/developer/docs/pricing"
 def get_esg_info(ticker):
-    # url = f"https://financialmodelingprep.com/api/v4/esg-environmental-social-governance-data?symbol={ticker}&apikey={FMP_API_KEY}"
-    # data = get_jsonparsed_data(url)
-    # print(data)
+    url = f"https://financialmodelingprep.com/api/v4/esg-environmental-social-governance-data?symbol={ticker}&apikey={FMP_API_KEY}"
+    data = get_jsonparsed_data(url)
+    print(data)
     # url = f"https://financialmodelingprep.com/api/v4/esg-environmental-social-governance-data-ratings?symbol={ticker}&apikey={FMP_API_KEY}"
-    # use researcher instead (a bit costly)
-    data = generate_response(f"provide ESG analysis for company with stock symbol {ticker}.")
+    # data = get_jsonparsed_data(url)
+    return data
+
+# use researcher instead 
+def get_esg_info_by_name(company_name):
+    # data = generate_response(f"Scrape relevant ESG website for {company_name} and provide ESG analysis for this company.")
+    data = generate_response(f"What is ESG rating and benchmarking score for {company_name}?")
     return data
 
 # use yfinance instead
 def get_recommendation(ticker):
     yf_ticker = yf.Ticker(ticker)
-    data = yf_ticker.recommendations.to_json()
-    print(data)
-    return data
+    if yf_ticker:
+        data = yf_ticker.recommendations.to_json()
+        print(data)
+        return data
 
 # Step 1: Retrieving financial news for a company
 # "Special Endpoint : This endpoint is not available under your current subscription 
@@ -79,9 +85,10 @@ def get_financial_news(ticker, limit, page):
 # use yfinance instead
 def get_financial_news(ticker):
     yf_ticker = yf.Ticker(ticker)
-    data = yf_ticker.news
-    print(data)
-    return data
+    if yf_ticker:
+        data = yf_ticker.news
+        print(data)
+        return data
 
 
 # Step 2: Generate Financial Statements Summary with GPT-4
@@ -139,7 +146,7 @@ def generate_key_metrics_summary(key_metrics):
 def final_analysis(objective, all_summaries):
 
     response = client.chat.completions.create(
-        model="gpt-4-1106-preview",
+        model="gpt-3.5-turbo-16k-0613",
         messages=[
             {
                 "role": "system",
@@ -177,7 +184,7 @@ def financial_statements():
     company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
     if company_name:
         ticker_gpt = get_ticker_by_gpt(company_name)
-        st.text(f"the company ticker for {company_name} is {ticker_gpt}")
+        st.warning(f"the company ticker for {company_name} is {ticker_gpt}")
 
     if st.button('Run'):
         with st.spinner("In progress..."):
@@ -215,7 +222,7 @@ def financial_metrics():
     company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
     if company_name:
         ticker_gpt = get_ticker_by_gpt(company_name)
-        st.text(f"the company ticker for {company_name} is {ticker_gpt}")
+        st.warning(f"the company ticker for {company_name} is {ticker_gpt}")
 
     if st.button('Run'):
         with st.spinner("In progress..."):
@@ -241,25 +248,27 @@ def financial_metrics():
 def esg_analysis():
     st.title('GPT 4 ESG Analysis')
 
-    ticker_input = st.text_input("Please enter the company ticker (such as MSFT):")
-    company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
-    if company_name:
-        ticker_gpt = get_ticker_by_gpt(company_name)
-        st.text(f"the company ticker for {company_name} is {ticker_gpt}")
+    company_name = st.text_input("Please enter the company name (such as Microsoft):")
+    # ticker_input = st.text_input("Please enter the company ticker (such as MSFT):")
+    # company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
+    # if company_name:
+    #     ticker_gpt = get_ticker_by_gpt(company_name)
+    #     st.warning(f"the company ticker for {company_name} is {ticker_gpt}")
 
     if st.button('Run'):
         with st.spinner("In progress..."):
-            if ticker_input: # always prioritize to use ticker_input
-                ticker = ticker_input
-            else:
-                ticker = ticker_gpt    
-            if ticker:
-                ticker = ticker.upper()
-                # esg_info = get_esg_info(ticker)
-                # final_esg_summary = final_analysis("ESG Analysis", esg_info)
-                final_esg_summary = get_esg_info(ticker)
+            # if ticker_input: # always prioritize to use ticker_input
+            #     ticker = ticker_input
+            # else:
+            #     ticker = ticker_gpt    
+            # if ticker:
+            #     ticker = ticker.upper()
+            #     esg_info = get_esg_info(ticker)
+            #     final_esg_summary = final_analysis("ESG Analysis", esg_info)
+            if company_name:
+                final_esg_summary = get_esg_info_by_name(company_name)
 
-                st.write(f'Summary for {ticker} esg analysis:\n\n {final_esg_summary}\n\n')
+                st.write(f'Summary for {company_name} ESG analysis:\n\n {final_esg_summary}\n\n')
         st.success('Done!')
 
 
@@ -279,7 +288,7 @@ def financial_news():
     company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
     if company_name:
         ticker_gpt = get_ticker_by_gpt(company_name)
-        st.text(f"the company ticker for {company_name} is {ticker_gpt}")
+        st.warning(f"the company ticker for {company_name} is {ticker_gpt}")
 
     if st.button('Run'):
         with st.spinner("In progress..."):
@@ -336,7 +345,7 @@ def get_ticker(company_name):
 # use GPT to get ticker name, works perfectly
 def get_ticker_by_gpt(company_name):
     response = client.chat.completions.create(
-        model="gpt-4-1106-preview",
+        model="gpt-3.5-turbo-16k-0613",
         messages=[
             {
                 "role": "system",

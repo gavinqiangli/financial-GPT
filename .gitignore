@@ -1,2 +1,4 @@
 
 .env
+pdf_llm_input_text.md
+researcher_ignore.py
