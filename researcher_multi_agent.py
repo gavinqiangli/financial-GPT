@@ -28,7 +28,7 @@ from langchain.chains import RetrievalQA
 from langchain.chains import RetrievalQAWithSourcesChain
 import pinecone
 
-from database import save_url_to_db, connect_2_db
+from database import connect_2_db
 from pymongo import MongoClient
 
 
