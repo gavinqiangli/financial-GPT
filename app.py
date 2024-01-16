@@ -8,6 +8,10 @@ import pandas as pd
 from chatstock import chat_stock
 import yfinance as yf
 from researcher import generate_response
+from researcher_multi_agent import generate_premium_response
+
+from database import connect_2_db
+from pymongo import MongoClient
 
 import os
 from dotenv import load_dotenv
@@ -16,6 +20,8 @@ load_dotenv()
 client = OpenAI()
 
 FMP_API_KEY = os.environ.get('FMP_API_KEY')
+ALPHAVANTAGE_API_KEY = os.environ.get('ALPHAVANTAGE_API_KEY')
+
 
 def get_jsonparsed_data(url):
     try:
@@ -303,6 +309,27 @@ def chat_with_stocks():
     st.subheader('Not Financial Advices')
     chat_stock()
 
+# Selecting financial assistant 6: premium research
+def premium_research():
+    st.title('GPT 4 Premium Research')
+
+    api_key = st.text_input("Please enter your api key to continue")
+    if api_key:
+        # check if api_key is valid
+        users, _ = connect_2_db()
+        find_api_key = users.find_one({"api_key": api_key})
+        if find_api_key:
+            # continue with premium query
+            premium_query = st.text_input("Please enter your research question or task")
+            
+            if st.button('Run'):
+                    with st.spinner("In progress..."):
+                        if premium_query:
+                            data = generate_premium_response(premium_query)
+                            st.write(data)
+                    st.success('Done!')
+
+
 # Panda frame the data
 def frame_data(data):
     if isinstance(data, list) and data:
@@ -313,8 +340,8 @@ def frame_data(data):
 
 
 # get company ticker by name
-# however, yahoo finance api only accepts user-agent by browser request, not by streamlit app
-def get_ticker(company_name):
+# option 1: yahoo finance api only accepts user-agent by browser request, not by streamlit app
+def get_ticker_by_yahoo(company_name):
     yfinance = "https://query2.finance.yahoo.com/v1/finance/search"
     user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
     params = {"q": company_name, "quotes_count": 1, "country": "United States"}
@@ -334,7 +361,7 @@ def get_ticker(company_name):
 
     return company_code
 
-# use GPT to get ticker name, works perfectly
+# option 2: use GPT to get ticker name, works perfectly but with cost
 def get_ticker_by_gpt(company_name):
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-16k-0613",
@@ -370,6 +397,40 @@ def get_ticker_by_gpt(company_name):
 
     return company_code
         
+# get company ticker by name
+# option 3: use alpha vantage api, but often return wrong infomation
+def get_ticker(company_name):
+    # replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
+    url = f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={company_name}&apikey={ALPHAVANTAGE_API_KEY}"
+    res = requests.get(url)
+    print(res.status_code)
+    print(res.text)
+    data = res.json()
+
+    print(data)
+
+    company_code = data['bestMatches'][0]['1. symbol']
+
+    if company_code:
+        print(f"The ticker symbol for {company_name} is {company_code}")
+    else:
+        print(f"Could not find the ticker symbol for {company_name}")
+
+    return company_code
+
+# get_ticker("apple")
+# # The ticker symbol for apple is APLE
+# get_ticker("microsoft")
+# # The ticker symbol for microsoft is MSF0.FRK
+# get_ticker("ericsson")
+# # The ticker symbol for ericsson is ERIXF
+# get_ticker("amazon")
+# # The ticker symbol for amazon is AMZN
+# get_ticker("china telecom")
+# # The ticker symbol for china telecom is ZCH.FRK
+# get_ticker("atlas copco")
+# # The ticker symbol for atlas copco is ATLCY
+
 
 # finally, to run main application
 def main():
@@ -393,7 +454,7 @@ def main():
 
     st.sidebar.header("Settings")
     app_mode = st.sidebar.selectbox("Choose your AI assistant:",
-        ["Financial Statements", "Financial Metrics", "ESG Analysis", "Financial News", "Chat With Stocks"])
+        ["Financial Statements", "Financial Metrics", "ESG Analysis", "Financial News", "Chat With Stocks", "Premium Research"])
     if app_mode == 'Financial Statements':
         financial_statements()
     if app_mode == 'Financial Metrics':
@@ -403,7 +464,9 @@ def main():
     if app_mode == 'Financial News':
         financial_news()   
     if app_mode == 'Chat With Stocks':
-        chat_with_stocks()   
+        chat_with_stocks()
+    if app_mode == 'Premium Research':
+        premium_research()   
 
 
 if __name__ == '__main__':
