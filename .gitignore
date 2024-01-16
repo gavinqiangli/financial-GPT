@@ -2,3 +2,5 @@
 .env
 pdf_llm_input_text.md
 researcher_ignore.py
+researcher_pdf.py
+researcher_multi_agent.py

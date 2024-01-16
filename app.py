@@ -182,16 +182,14 @@ def financial_statements():
     
     ticker_input = st.text_input("Please enter the company ticker (such as MSFT):")
     company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
-    if company_name:
-        ticker_gpt = get_ticker_by_gpt(company_name)
-        st.warning(f"the company ticker for {company_name} is {ticker_gpt}")
-
+    
     if st.button('Run'):
         with st.spinner("In progress..."):
             if ticker_input: # always prioritize to use ticker_input
                 ticker = ticker_input
-            else:
-                ticker = ticker_gpt 
+            elif company_name:
+                ticker = get_ticker_by_gpt(company_name)
+                print(f"the company ticker for {company_name} is {ticker}")
             if ticker:
                 ticker = ticker.upper()
                 financial_statements = get_financial_statements(ticker, limit, period, statement_type)
@@ -220,16 +218,14 @@ def financial_metrics():
     
     ticker_input = st.text_input("Please enter the company ticker (such as MSFT):")
     company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
-    if company_name:
-        ticker_gpt = get_ticker_by_gpt(company_name)
-        st.warning(f"the company ticker for {company_name} is {ticker_gpt}")
-
+    
     if st.button('Run'):
         with st.spinner("In progress..."):
             if ticker_input: # always prioritize to use ticker_input
                 ticker = ticker_input
-            else:
-                ticker = ticker_gpt    
+            elif company_name:
+                ticker = get_ticker_by_gpt(company_name)
+                print(f"the company ticker for {company_name} is {ticker}")
             if ticker:
                 ticker = ticker.upper()
                 key_metrics = get_key_metrics(ticker, limit, period)
@@ -251,16 +247,14 @@ def esg_analysis():
     company_name = st.text_input("Please enter the company name (such as Microsoft):")
     # ticker_input = st.text_input("Please enter the company ticker (such as MSFT):")
     # company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
-    # if company_name:
-    #     ticker_gpt = get_ticker_by_gpt(company_name)
-    #     st.warning(f"the company ticker for {company_name} is {ticker_gpt}")
-
+    
     if st.button('Run'):
         with st.spinner("In progress..."):
             # if ticker_input: # always prioritize to use ticker_input
             #     ticker = ticker_input
-            # else:
-            #     ticker = ticker_gpt    
+            # elif company_name:
+            #     ticker = get_ticker_by_gpt(company_name)
+            #     print(f"the company ticker for {company_name} is {ticker}")  
             # if ticker:
             #     ticker = ticker.upper()
             #     esg_info = get_esg_info(ticker)
@@ -276,26 +270,24 @@ def esg_analysis():
 def financial_news():
     st.title('GPT 4 Financial News')
 
-    col1, col2 = st.columns(2)
+    # col1, col2 = st.columns(2)
 
-    with col1:
-        page = st.number_input("Pages of past financial news to analyze:", min_value=0, max_value=4, value=0)
+    # with col1:
+    #     page = st.number_input("Pages of past financial news to analyze:", min_value=0, max_value=4, value=0)
 
-    with col2:
-        limit = st.number_input("Number of past financial news to analyze:", min_value=1, max_value=50, value=4)
+    # with col2:
+    #     limit = st.number_input("Number of past financial news to analyze:", min_value=1, max_value=50, value=4)
     
     ticker_input = st.text_input("Please enter the company ticker (such as MSFT):")
     company_name = st.text_input("Don't know company ticker? Try to enter company name instead (such as Microsoft):")
-    if company_name:
-        ticker_gpt = get_ticker_by_gpt(company_name)
-        st.warning(f"the company ticker for {company_name} is {ticker_gpt}")
-
+    
     if st.button('Run'):
         with st.spinner("In progress..."):
             if ticker_input: # always prioritize to use ticker_input
                 ticker = ticker_input
-            else:
-                ticker = ticker_gpt    
+            elif company_name:
+                ticker = get_ticker_by_gpt(company_name)
+                print(f"the company ticker for {company_name} is {ticker}")   
             if ticker:
                 ticker = ticker.upper()
                 # financial_news = get_financial_news(ticker, limit, page)
@@ -349,15 +341,23 @@ def get_ticker_by_gpt(company_name):
         messages=[
             {
                 "role": "system",
-                "content": "You are an Financial expert that knows Stock Ticker Symbol for all listed companies",
-            },
-            {
-                "role": "user",
                 "content": f"""
-                what is Stock Ticker Symbol for {company_name}.
-                only provide the ticker name as response, nothing else. 
+                You are an Financial expert that knows Stock Ticker Symbol for all listed companies,
+                You should only provide the ticker name as response, typically no more than four letters, 
+                you should return nothing else than stock ticker symbol for given company {company_name}.
+                For example:
+                you should return MSFT for microsoft,
+                you should return AAPL for apple,
+                you should return ERIC for ericsson,
+                you should return AMZN for Amazon,
                 """
-            }
+            },
+            # {
+            #     "role": "user",
+            #     "content": f"""
+            #     what is Stock Ticker Symbol for {company_name}? 
+            #     """
+            # }
         ]
     )
 
