@@ -23,7 +23,7 @@ from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain.chains.llm import LLMChain
 from langchain_openai import OpenAIEmbeddings
 import pinecone
-from langchain.vectorstores import Pinecone
+from langchain_community.vectorstores import Pinecone
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain.chains import RetrievalQA
 from langchain.chains import RetrievalQAWithSourcesChain
