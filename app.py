@@ -328,7 +328,8 @@ def premium_research():
                             data = generate_premium_response(premium_query)
                             st.write(data)
                     st.success('Done!')
-
+        else:
+            st.warning("api key doesn't exist")
 
 # Panda frame the data
 def frame_data(data):

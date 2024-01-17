@@ -27,11 +27,8 @@ from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain.chains import RetrievalQA
 from langchain.chains import RetrievalQAWithSourcesChain
 import pinecone
-
 from database import connect_2_db
 from pymongo import MongoClient
-
-
 
 load_dotenv()
 brwoserless_api_key = os.getenv("BROWSERLESS_API_KEY")
@@ -44,7 +41,7 @@ pinecone_env = os.environ.get('PINECONE_ENVIRONMENT')
 pinecone_index = os.environ.get('PINECONE_INDEX_NAME')
 pinecone_namespace = os.environ.get('PINECONE_NAME_SPACE')
 
-
+pinecone.init(api_key=pinecone_api_key, environment=pinecone_env)
 
 # 1. Tool for RAG retrieval from knowledge base
 def knowledgebase(objective):
@@ -52,7 +49,7 @@ def knowledgebase(objective):
     # chat completion llm
     llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613")
        
-    pinecone.init(api_key=pinecone_api_key, environment=pinecone_env)
+    # pinecone.init(api_key=pinecone_api_key, environment=pinecone_env)
 
     embeddings = OpenAIEmbeddings()
 
@@ -206,7 +203,7 @@ def rag_ingestion_retrieval(objective, content):
   
     print('creating vector store...')
 
-    pinecone.init(api_key=pinecone_api_key, environment=pinecone_env)
+    # pinecone.init(api_key=pinecone_api_key, environment=pinecone_env)
 
     embeddings = OpenAIEmbeddings()
    
