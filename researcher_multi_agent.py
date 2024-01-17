@@ -22,11 +22,11 @@ from langchain.chains import MapReduceDocumentsChain, ReduceDocumentsChain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain.chains.llm import LLMChain
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import Pinecone
+import pinecone
+from langchain.vectorstores import Pinecone
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain.chains import RetrievalQA
 from langchain.chains import RetrievalQAWithSourcesChain
-import pinecone
 from database import connect_2_db
 from pymongo import MongoClient
 
