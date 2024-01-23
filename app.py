@@ -313,7 +313,7 @@ def chat_with_stocks():
 def premium_research():
     st.title('GPT 4 Premium Research')
 
-    api_key = st.text_input("Please enter your api key to continue")
+    api_key = st.text_input("Please enter your api key to continue", type="password")
     if api_key:
         # check if api_key is valid
         users, _ = connect_2_db()
