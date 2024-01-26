@@ -174,7 +174,7 @@ def final_analysis(objective, all_summaries):
 # Step 4: Building the Streamlit App
 # Selecting financial assistant 1: financial_statements
 def financial_statements():
-    st.title('GPT 4 Financial Statements')
+    st.title('GPT 4 Financial Statements :bird:')
 
     statement_type = st.selectbox("Select financial statement type:", ["Income Statement", "Balance Sheet", "Cash Flow"])
 
@@ -212,7 +212,7 @@ def financial_statements():
 
 # Selecting financial assistant 2: financial_metrics
 def financial_metrics():
-    st.title('GPT 4 Financial Metrics')
+    st.title('GPT 4 Financial Metrics :bird:')
 
     col1, col2 = st.columns(2)
 
@@ -248,7 +248,7 @@ def financial_metrics():
 
 # Selecting financial assistant 3: esg_analysis
 def esg_analysis():
-    st.title('GPT 4 ESG Analysis')
+    st.title('GPT 4 ESG Analysis :bird:')
 
     company_name = st.text_input("Please enter the company name (such as Microsoft):")
     # ticker_input = st.text_input("Please enter the company ticker (such as MSFT):")
@@ -274,7 +274,7 @@ def esg_analysis():
 
 # Selecting financial assistant 4: financial_news
 def financial_news():
-    st.title('GPT 4 Financial News')
+    st.title('GPT 4 Financial News :bird:')
 
     # col1, col2 = st.columns(2)
 
@@ -305,13 +305,13 @@ def financial_news():
 
 # Selecting financial assistant 5: chat_with_stocks
 def chat_with_stocks():
-    st.title('GPT 4 Chat With Stocks')
+    st.title('GPT 4 Chat With Stocks :bird:')
     st.subheader('(Not Financial Advices)')
     chat_stock()
 
 # Selecting financial assistant 6: premium research
 def premium_research():
-    st.title('GPT 4 Premium Research')
+    st.title('GPT 4 Premium Research :bird:')
 
     api_key = st.text_input("Please enter your access code to continue (DM me on Linkedin to get access)", type="password")
     if api_key:
