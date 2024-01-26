@@ -306,14 +306,14 @@ def financial_news():
 # Selecting financial assistant 5: chat_with_stocks
 def chat_with_stocks():
     st.title('GPT 4 Chat With Stocks')
-    st.subheader('Not Financial Advices')
+    st.subheader('(Not Financial Advices)')
     chat_stock()
 
 # Selecting financial assistant 6: premium research
 def premium_research():
     st.title('GPT 4 Premium Research')
 
-    api_key = st.text_input("Please enter your api key to continue", type="password")
+    api_key = st.text_input("Please enter your access code to continue (DM me on Linkedin to get access)", type="password")
     if api_key:
         # check if api_key is valid
         users, _ = connect_2_db()
@@ -329,7 +329,7 @@ def premium_research():
                             st.write(data)
                     st.success('Done!')
         else:
-            st.warning("api key doesn't exist")
+            st.warning("access code is invalid, please retry or get new code")
 
 # Panda frame the data
 def frame_data(data):
