@@ -455,7 +455,7 @@ def main():
 
     st.sidebar.header("Settings")
     app_mode = st.sidebar.selectbox("Choose your AI assistant:",
-        ["Financial Statements", "Financial Metrics", "ESG Analysis", "Financial News", "Chat With Stocks", "Premium Research"])
+        ["Chat With Stocks", "Financial Statements", "Financial Metrics", "ESG Analysis", "Financial News", "Premium Insights"])
     if app_mode == 'Financial Statements':
         financial_statements()
     if app_mode == 'Financial Metrics':
@@ -466,7 +466,7 @@ def main():
         financial_news()   
     if app_mode == 'Chat With Stocks':
         chat_with_stocks()
-    if app_mode == 'Premium Research':
+    if app_mode == 'Premium Insights':
         premium_research()   
 
 
